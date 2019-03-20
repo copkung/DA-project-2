@@ -1,0 +1,177 @@
+
+import java.util.*;
+
+import org.jgrapht.*;
+import org.jgrapht.graph.*;
+import org.jgrapht.alg.*;
+
+import java.io.*;
+import java.lang.*;
+
+
+class Dict
+{
+    private String word;
+    public Dict(String n)	{ word = n; }
+    public String getName()			    { return word; }
+    public String getMessage()
+    {
+        String s = String.format("%s ", word);
+        return s;
+    }
+    public void print()
+    {
+        System.out.println( getMessage() );
+    }
+    // equality based on name
+    public boolean equals(Object o)
+    {
+        Dict other = (Dict) o;
+        return this.word.equalsIgnoreCase(other.word);
+    }
+    // hashcode based on the hashcode of name
+    public int hashCode()
+    {
+        return word.toLowerCase().hashCode();
+    }
+}
+
+
+class Project{
+    protected HashMap<String, Dict>  AllWord;// real objects
+    protected ArrayList<String> Word;		 // graph nodes
+    protected ArrayDeque<String> closedPath /*= new ArrayDeque<>()*/;
+
+    protected Graph<String, DefaultEdge>                       G;
+    private   SimpleGraph<String, DefaultEdge>                 SG;
+    protected ConnectivityInspector<String, DefaultEdge>       conn;
+    protected KruskalMinimumSpanningTree<String, DefaultEdge>  MST;
+    protected String fileName,p1,p2,searchWord;
+    protected File wordFile;
+
+    public Project(){
+        System.out.printf("Enter graph file : ");
+        Scanner scan = new Scanner(System.in);
+        fileName = scan.next();
+        closedPath = new ArrayDeque<String>();
+        try{
+            wordFile = new File(fileName);
+            Scanner readFile = new Scanner (wordFile);
+            AllWord = new HashMap<String, Dict>();
+            Word = new ArrayList<String>();
+            SG = new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
+            G  = (Graph<String, DefaultEdge>)SG;
+            while(readFile.hasNextLine())
+            {
+                String w1 = readFile.nextLine();
+                if (!AllWord.containsKey(w1))
+                {
+                    AllWord.put(w1,new Dict(w1));
+                }
+                if(!Word.contains(w1))
+                {
+                    Word.add(w1);
+                }
+            }
+        }catch(Exception e){ System.out.printf("ERROR! : " + e ); System.exit(0);}
+        Graphs.addAllVertices(G,Word);
+        ArrayDeque<String> temp = new ArrayDeque<>(Word);
+        for (int i = 1 ; i - 1 < temp.size();i++)
+        {
+            //System.out.print(i);
+            String w1 = temp.pop();
+            String w2 = temp.peek();
+             G.addEdge(w1,w2);
+        }
+
+        Search();
+    }
+
+    public void Search()
+    {
+        Scanner scan = new Scanner(System.in);
+        System.out.print("\nSearch = ");
+        searchWord = scan.next();
+        boolean check = false;
+        ArrayDeque<Character> input = new ArrayDeque<Character>();
+        for (int i = 0 ; i < searchWord.length() ; i++)
+        {
+            input.add(searchWord.charAt(i));
+        }
+        ArrayDeque<Character> sword = new ArrayDeque<>(input);
+        for (int i = 0; i < 5; i++)
+            {
+                 sword = input;
+                String w = Word.get(i);
+                for (int j = 0 ; j < sword.size() ; j++)
+                    {
+                        while(!sword.isEmpty())
+                        {
+                            if (w.charAt(j) == sword.peek())
+                            {
+                                    input.pop();
+                                    check = true;
+                            }
+                        }
+                    }
+                if(check){System.out.printf(Word.get(i));}
+            }
+        // source and target must exist, otherwise error
+    }
+
+
+    public void printDefaultEdges(Collection<DefaultEdge> E, boolean f)
+    {
+        for (DefaultEdge e : E)
+        {
+            //System.out.println(e.toString());
+
+            Dict source = searchPoint(G.getEdgeSource(e));
+            Dict target = searchPoint(G.getEdgeTarget(e));
+            double  weight = G.getEdgeWeight(e);
+
+            if (f)  // print Country details
+                System.out.printf("%4s - %4s     weight = %4.0f mins \n",
+                        source.getMessage(), target.getMessage(), weight);
+            else    // print only Country name
+            {System.out.printf("%s - %s (%.0f)   ", source.getName(), target.getName(),weight);}
+        }
+        //add = false;
+    }
+
+    public Dict searchPoint(String name)
+    {
+        return AllWord.get(name);
+    }
+
+    public void printGraph()
+    {
+        Set<DefaultEdge> allEdges = G.edgeSet();
+        printDefaultEdges(allEdges, true);
+    }
+
+    public void testMST()
+    {
+        conn = new ConnectivityInspector<String, DefaultEdge>(SG);
+        if (conn.isGraphConnected())
+        {
+            System.out.println("\nGraph is connected");
+            MST = new KruskalMinimumSpanningTree<String, DefaultEdge>(SG);
+            Set<DefaultEdge> treeEdges = MST.getEdgeSet();
+            System.out.printf("MST edge length = %.0f \n", MST.getSpanningTreeCost());
+            printDefaultEdges(treeEdges, true);
+        }
+        else
+            System.out.println("\nGraph is not connected");
+    }
+
+}
+
+
+public class Main {
+
+    public static void main(String[] args)
+    {
+        Project mygraph = new Project();
+    }
+}
