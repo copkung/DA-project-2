@@ -49,6 +49,7 @@ class Project{
     protected KruskalMinimumSpanningTree<String, DefaultEdge>  MST;
     protected String fileName,p1,p2,searchWord;
     protected File wordFile;
+    protected boolean check = false;
 
     public Project(){
         System.out.printf("Enter graph file : ");
@@ -90,6 +91,7 @@ class Project{
 
     public void Search()
     {
+        Set<DefaultEdge> allEdges = G.edgeSet();
         Scanner scan = new Scanner(System.in);
         System.out.print("\nSearch = ");
         searchWord = scan.next();
@@ -98,9 +100,24 @@ class Project{
             {
                 arrayInput.add(searchWord.charAt(i));
             }
-        for(int i = 0; i < arrayInput.size(); i++){System.out.println(arrayInput.get(i));}
+            System.out.print(searchWord.length() + "\n");
         //if(G.containsVertex(searchWord)){System.out.println("G.containsVertex(searchWord) Found!!!");}
 
+        for (DefaultEdge e : allEdges)
+        {
+            String word = searchPoint(G.getEdgeSource(e)).getMessage();
+            for(int i = 0; i <searchWord.length(); i++)
+            {
+                if(searchWord.charAt(i) == word.charAt(i))
+                {
+                    check = true;
+                    /*System.out.printf("\n TRUE!!");*/
+                }
+                else {check = false;/*System.out.printf("\n False!");*/ break;}
+            }
+            if(check){System.out.println(word);}
+            else continue;
+        }
     }
 
 
