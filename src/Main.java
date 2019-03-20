@@ -86,7 +86,9 @@ class Project{
              G.addEdge(w1,w2);
         }
         //printGraph(); print the graph out
-        Search();
+        System.out.printf("Do you want to search for the word or transform the word?");
+        scan.next();
+        if(scan.next() == "search" || scan.next() == "Search"){ Search();}
     }
 
     public void Search()
@@ -101,7 +103,6 @@ class Project{
                 arrayInput.add(searchWord.charAt(i));
             }
             System.out.print(searchWord.length() + "\n");
-        //if(G.containsVertex(searchWord)){System.out.println("G.containsVertex(searchWord) Found!!!");}
 
         for (DefaultEdge e : allEdges)
         {
