@@ -4,6 +4,7 @@ import java.util.*;
 import org.jgrapht.*;
 import org.jgrapht.graph.*;
 import org.jgrapht.alg.*;
+import sun.tools.tree.CharExpression;
 
 import java.io.*;
 import java.lang.*;
@@ -83,7 +84,7 @@ class Project{
             String w2 = temp.peek();
              G.addEdge(w1,w2);
         }
-
+        //printGraph(); print the graph out
         Search();
     }
 
@@ -92,31 +93,14 @@ class Project{
         Scanner scan = new Scanner(System.in);
         System.out.print("\nSearch = ");
         searchWord = scan.next();
-        boolean check = false;
-        ArrayDeque<Character> input = new ArrayDeque<Character>();
-        for (int i = 0 ; i < searchWord.length() ; i++)
-        {
-            input.add(searchWord.charAt(i));
-        }
-        ArrayDeque<Character> sword = new ArrayDeque<>(input);
-        for (int i = 0; i < 5; i++)
+        ArrayList<Character> arrayInput = new ArrayList<Character>();
+        for(int i = 0; i < searchWord.length(); i++)
             {
-                 sword = input;
-                String w = Word.get(i);
-                for (int j = 0 ; j < sword.size() ; j++)
-                    {
-                        while(!sword.isEmpty())
-                        {
-                            if (w.charAt(j) == sword.peek())
-                            {
-                                    input.pop();
-                                    check = true;
-                            }
-                        }
-                    }
-                if(check){System.out.printf(Word.get(i));}
+                arrayInput.add(searchWord.charAt(i));
             }
-        // source and target must exist, otherwise error
+        for(int i = 0; i < arrayInput.size(); i++){System.out.println(arrayInput.get(i));}
+        //if(G.containsVertex(searchWord)){System.out.println("G.containsVertex(searchWord) Found!!!");}
+
     }
 
 
@@ -125,16 +109,13 @@ class Project{
         for (DefaultEdge e : E)
         {
             //System.out.println(e.toString());
-
             Dict source = searchPoint(G.getEdgeSource(e));
             Dict target = searchPoint(G.getEdgeTarget(e));
-            double  weight = G.getEdgeWeight(e);
-
             if (f)  // print Country details
-                System.out.printf("%4s - %4s     weight = %4.0f mins \n",
-                        source.getMessage(), target.getMessage(), weight);
+                System.out.printf("%6s - %6s\n",
+                        source.getMessage(), target.getMessage());
             else    // print only Country name
-            {System.out.printf("%s - %s (%.0f)   ", source.getName(), target.getName(),weight);}
+            {System.out.printf("%s - %s  ", source.getName(), target.getName());}
         }
         //add = false;
     }
