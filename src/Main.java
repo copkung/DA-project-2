@@ -35,19 +35,19 @@ class Dict
     {
         return word.toLowerCase().hashCode();
     }
-}
+}   //END CLASS DICT
 
 
 class Project{
     protected HashMap<String, Dict>  AllWord;// real objects
-    protected ArrayList<String> Word;		 // graph nodes
+    protected ArrayList<String> Word,TransTemp;		 // graph nodes
     protected ArrayDeque<String> closedPath /*= new ArrayDeque<>()*/;
 
     protected Graph<String, DefaultEdge>                       G;
     private   SimpleGraph<String, DefaultEdge>                 SG;
     protected ConnectivityInspector<String, DefaultEdge>       conn;
     protected KruskalMinimumSpanningTree<String, DefaultEdge>  MST;
-    protected String fileName,p1,p2,searchWord;
+    protected String fileName,p1,p2,searchWord,Word1,Word2;
     protected File wordFile;
     protected boolean check = false;
 
@@ -77,32 +77,37 @@ class Project{
             }
         }catch(Exception e){ System.out.printf("ERROR! : " + e ); System.exit(0);}
         Graphs.addAllVertices(G,Word);
-        ArrayDeque<String> temp = new ArrayDeque<>(Word);
+        ArrayList<String> list = new ArrayList<String>(Word);
+        Collections.sort(list);     // Sort all words in order
+        ArrayDeque<String> temp = new ArrayDeque<>(list);   // put the ordered words into the arraydeque
         for (int i = 1 ; i - 1 < temp.size();i++)
         {
-            //System.out.print(i);
             String w1 = temp.pop();
             String w2 = temp.peek();
-             G.addEdge(w1,w2);
+             G.addEdge(w1,w2);      // add and connect together to the graph
         }
         //printGraph(); print the graph out
-        System.out.printf("Do you want to search for the word or transform the word?");
-        scan.next();
-        if(scan.next() == "search" || scan.next() == "Search"){ Search();}
+        System.out.printf("Do you want to search for the word or transform the word?\n =>");
+        String choice = scan.next();
+        //System.out.printf(choice);
+        switch(choice)
+        {
+            case "search" :System.out.print("\nSearch => ");String inSearch = scan.next();Search(inSearch);break;
+            case "transform":Transform();break;
+        }
     }
 
-    public void Search()
+    public void Search(String n)
     {
         Set<DefaultEdge> allEdges = G.edgeSet();
-        Scanner scan = new Scanner(System.in);
-        System.out.print("\nSearch = ");
-        searchWord = scan.next();
+        searchWord = n;
         ArrayList<Character> arrayInput = new ArrayList<Character>();
+        TransTemp = new ArrayList<String>();
         for(int i = 0; i < searchWord.length(); i++)
             {
                 arrayInput.add(searchWord.charAt(i));
             }
-            System.out.print(searchWord.length() + "\n");
+            //System.out.print(searchWord.length() + "\n");  // check the char count from the input
 
         for (DefaultEdge e : allEdges)
         {
@@ -116,10 +121,40 @@ class Project{
                 }
                 else {check = false;/*System.out.printf("\n False!");*/ break;}
             }
-            if(check){System.out.println(word);}
+            if(check){System.out.println(word);TransTemp.add(word);}
             else continue;
         }
     }
+
+    public void Transform()
+    {
+        System.out.print("Enter 5 - letters word 1 : ");
+        Scanner scan = new Scanner(System.in);
+        Word1 = scan.next();
+        System.out.println("Enter 5 - letters word 2 : ");
+        Word2 = scan.next();
+        int check = cmpStr(Word1,Word2);
+        while(check != 0)
+        {
+
+
+
+
+
+        }
+
+
+
+
+
+
+    }
+
+    public int cmpStr(String a, String b)
+    {
+        return a.compareToIgnoreCase(b);
+    }
+    // It returns 0 when the strings are equal otherwise it returns positive or negative value.
 
 
     public void printDefaultEdges(Collection<DefaultEdge> E, boolean f)
@@ -143,13 +178,13 @@ class Project{
         return AllWord.get(name);
     }
 
-    public void printGraph()
+   /* public void printGraph()
     {
         Set<DefaultEdge> allEdges = G.edgeSet();
         printDefaultEdges(allEdges, true);
-    }
+    }*/
 
-    public void testMST()
+    /*public void testMST()
     {
         conn = new ConnectivityInspector<String, DefaultEdge>(SG);
         if (conn.isGraphConnected())
@@ -162,9 +197,9 @@ class Project{
         }
         else
             System.out.println("\nGraph is not connected");
-    }
+    }*/
 
-}
+}   // END CLASS PROJECT
 
 
 public class Main {
