@@ -8,6 +8,7 @@ import sun.tools.tree.CharExpression;
 
 import java.io.*;
 import java.lang.*;
+import java.math.*;
 
 
 class Dict
@@ -40,16 +41,17 @@ class Dict
 
 class Project{
     protected HashMap<String, Dict>  AllWord;// real objects
-    protected ArrayList<String> Word,TransTemp;		 // graph nodes
-    protected ArrayDeque<String> closedPath /*= new ArrayDeque<>()*/;
+    protected ArrayList<String> Word,SearchResult;		 // graph nodes
+    protected ArrayDeque<String> closedPath,TransTemp /*= new ArrayDeque<>()*/;
 
     protected Graph<String, DefaultEdge>                       G;
     private   SimpleGraph<String, DefaultEdge>                 SG;
-    protected ConnectivityInspector<String, DefaultEdge>       conn;
-    protected KruskalMinimumSpanningTree<String, DefaultEdge>  MST;
-    protected String fileName,p1,p2,searchWord,Word1,Word2;
-    protected File wordFile;
-    protected boolean check = false;
+   /* protected ConnectivityInspector<String, DefaultEdge>       conn;
+    protected KruskalMinimumSpanningTree<String, DefaultEdge>  MST;*/
+    private String fileName,searchWord,Word1,Word2;
+    private File wordFile;
+    private boolean check = false;
+    private int counter = 0,pos;
 
     public Project(){
         System.out.printf("Enter graph file : ");
@@ -92,9 +94,13 @@ class Project{
         //System.out.printf(choice);
         switch(choice)
         {
-            case "search" :System.out.print("\nSearch => ");String inSearch = scan.next();Search(inSearch);break;
+            case "search" :
+                System.out.print("\nSearch => ");
+                String inSearch = scan.next();Search(inSearch);report(SearchResult);
+                break;
             case "transform":Transform();break;
         }
+        System.out.println("--------END PROGRAM-------");
     }
 
     public void Search(String n)
@@ -102,12 +108,12 @@ class Project{
         Set<DefaultEdge> allEdges = G.edgeSet();
         searchWord = n;
         ArrayList<Character> arrayInput = new ArrayList<Character>();
-        TransTemp = new ArrayList<String>();
+        TransTemp = new ArrayDeque<String>();
+        SearchResult = new ArrayList<String>();
         for(int i = 0; i < searchWord.length(); i++)
             {
                 arrayInput.add(searchWord.charAt(i));
             }
-            //System.out.print(searchWord.length() + "\n");  // check the char count from the input
 
         for (DefaultEdge e : allEdges)
         {
@@ -117,13 +123,17 @@ class Project{
                 if(searchWord.charAt(i) == word.charAt(i))
                 {
                     check = true;
-                    /*System.out.printf("\n TRUE!!");*/
                 }
-                else {check = false;/*System.out.printf("\n False!");*/ break;}
+                else {check = false;break;}
             }
-            if(check){System.out.println(word);TransTemp.add(word);}
+            if(check){TransTemp.add(word);SearchResult.add(word);}
             else continue;
         }
+    }
+
+    public void report(ArrayList<String> a){
+        for(int i = 0; i< a.size(); i++)
+        {System.out.println(a.get(i));}
     }
 
     public void Transform()
@@ -133,29 +143,60 @@ class Project{
         Word1 = scan.next();
         System.out.println("Enter 5 - letters word 2 : ");
         Word2 = scan.next();
-        int check = cmpStr(Word1,Word2);
-        while(check != 0)
-        {
+        int check = cmpStr(Word1,Word2),i;
+        String next = "",Cur = Word1;
+        boolean same = true;
+        String subCur;
+        char cur,nchar;
+        while(check != 0) {
+            for (i = 3; i >= 0; i--)
+            {
+                subCur = Cur.substring(0, i);
+                Search(subCur);
+                if (!TransTemp.isEmpty()) break;
+            }
+            //need to fix this for j loop -> changing algorithm
+            for (int j = 0; j < TransTemp.size(); j++)
+            {
+                next = TransTemp.pop();
+                check(Cur,next);
+                if(counter == 1) break;
+            }
+            cur = Cur.charAt(pos);nchar = next.charAt(pos);
 
+            System.out.printf("This is cur :" + Cur);
+            System.out.printf("\n This is next : " + next);
+            Cur = next;
+            int asc1 = (int)cur,asc2 = (int) nchar,diff;
+            diff = Math.abs(asc1-asc2);
+            System.out.printf("\n" + next + "(+%d)",diff);
+            check = cmpStr(Cur,Word2);
+            check = 0;
+        }// end while
+    }
 
-
-
-
-        }
-
-
-
-
-
-
+    public int checkAlOrder(char i)
+    {
+        int ascii = (int) i - 96;
+        return ascii;
     }
 
     public int cmpStr(String a, String b)
     {
-        return a.compareToIgnoreCase(b);
+        return a.compareTo(b);
     }
     // It returns 0 when the strings are equal otherwise it returns positive or negative value.
 
+    public void check(String a, String b)
+    {
+        counter = 0;
+        char cA,cB;
+        for (int i = 0 ; i < 5 ; i++)
+        {
+            cA = a.charAt(i);cB = b.charAt(i);
+            if(cA != cB){counter++; pos = i;}
+        }
+    }
 
     public void printDefaultEdges(Collection<DefaultEdge> E, boolean f)
     {
