@@ -48,7 +48,7 @@ class Project{
     protected Graph<String, DefaultWeightedEdge>                 G,GSearch;
     private   SimpleWeightedGraph<String, DefaultWeightedEdge>  SG;
     protected DijkstraShortestPath<String, DefaultWeightedEdge>         DSP;
-    private String fileName,searchWord,Word1,Word2;
+    private String fileName,searchWord,Word1,Word2,Prev;
     private File wordFile;
     private boolean check = false,all = true;
     private int counter = 0,pos,ncount,npos,spot;
@@ -106,8 +106,6 @@ class Project{
                             int asc1 = checkAlOrder(w1.charAt(npos)),asc2 = checkAlOrder(w2.charAt(npos));
                             int weight = Math.abs(asc1-asc2);
                             Graphs.addEdgeWithVertices(G,w1,w2,weight);
-                            //Keep.remove(e);
-//                            break;
                         }
                 }
                 //System.out.println("change w1");
@@ -170,6 +168,7 @@ class Project{
         System.out.println("Enter 5 - letters word 2 : ");
         String k2 = scan.next();
         Word2 = k2;
+        Prev = Word1;
         System.out.printf("\n%s",Word1);
         if (G.containsVertex(k1) && G.containsVertex(k2))
         {
@@ -195,15 +194,22 @@ class Project{
         for (DefaultWeightedEdge e : E)
         {
             //System.out.println(e.toString());
-            //Dict source = searchPoint(G.getEdgeSource(e));
 
+            Dict source = searchPoint(G.getEdgeSource(e));
             Dict target = searchPoint(G.getEdgeTarget(e));
+            String sourceWord = source.getMessage();
+            String targetWord = target.getMessage();
+            String printWord = targetWord;
+            if(Prev.equals(sourceWord)){printWord = targetWord;}
+            else if (Prev.equals(targetWord)){printWord = sourceWord;}
             double  weight = G.getEdgeWeight(e);
+
             if (f)  // print Country details
-                System.out.printf("\n%s (+%.0f)", target.getMessage(),weight);
+                System.out.printf("\n%s (+%.0f)", printWord,weight);
             else    // print only Country name
             {System.out.printf("\n%s - %s", target.getName());}
             G.removeVertex(G.getEdgeTarget(e));
+            Prev = target.getMessage();
         }
         //add = false;
     }
