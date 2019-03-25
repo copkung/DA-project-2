@@ -44,12 +44,10 @@ class Dict
 class Project{
     protected HashMap<String, Dict>  AllWord;// real objects
     protected ArrayList<String> Word,SearchResult,Keep;		 // graph nodes
-    protected ArrayDeque<String> TransTemp;
 
     protected Graph<String, DefaultWeightedEdge>                 G,GSearch;
     private   SimpleWeightedGraph<String, DefaultWeightedEdge>  SG;
-   /* protected ConnectivityInspector<String, DefaultEdge>       conn;
-    protected KruskalMinimumSpanningTree<String, DefaultEdge>  MST;*/
+    protected DijkstraShortestPath<String, DefaultWeightedEdge>         DSP;
     private String fileName,searchWord,Word1,Word2;
     private File wordFile;
     private boolean check = false,all = true;
@@ -108,14 +106,13 @@ class Project{
                             int asc1 = checkAlOrder(w1.charAt(npos)),asc2 = checkAlOrder(w2.charAt(npos));
                             int weight = Math.abs(asc1-asc2);
                             Graphs.addEdgeWithVertices(G,w1,w2,weight);
-                            Keep.remove(e);
-                            break;
+                            //Keep.remove(e);
+//                            break;
                         }
-                    else continue;
                 }
                 //System.out.println("change w1");
             }
-            System.out.println("End while");
+            System.out.print("\nEnd while");
             all = false;
         }
 //        printGraph();
@@ -129,7 +126,7 @@ class Project{
                 break;
             case "transform":Transform();break;
         }
-        System.out.println("--------END PROGRAM-------");
+        System.out.println("\n--------END PROGRAM-------");
     }
 
     public void Search(String n)
@@ -168,10 +165,23 @@ class Project{
     {
         System.out.print("Enter 5 - letters word 1 : ");
         Scanner scan = new Scanner(System.in);
-        Word1 = scan.next();
+        String k1 = scan.next();
+        Word1 = k1;
         System.out.println("Enter 5 - letters word 2 : ");
-        Word2 = scan.next();
-
+        String k2 = scan.next();
+        Word2 = k2;
+        System.out.printf("\n%s",Word1);
+        if (G.containsVertex(k1) && G.containsVertex(k2))
+        {
+            DSP = new DijkstraShortestPath<String, DefaultWeightedEdge>(SG, k1, k2);
+            List<DefaultWeightedEdge> path = DSP.getPathEdgeList();
+            if (path != null)
+            {
+                printDefaultWeightedEdges(path, true);
+            }
+            else
+                System.out.printf("\nCannot transform %s into %s\n", k1, k2);
+        }
     }
 
     public int checkAlOrder(char i)
@@ -180,34 +190,20 @@ class Project{
         return asc;
     }
 
-    public int cmpStr(String a, String b)
-    {
-        return a.compareToIgnoreCase(b);
-    }
-    // It returns 0 when the strings are equal otherwise it returns positive or negative value.
-
-    public void check(String a, String b)
-    {
-        counter = 0;
-        char cA,cB;
-        for (int i = 0 ; i < 5 ; i++)
-        {
-            cA = a.charAt(i);cB = b.charAt(i);
-            if(cA != cB){counter++; pos = i;}
-        }
-    }
-
     public void printDefaultWeightedEdges(Collection<DefaultWeightedEdge> E, boolean f)
     {
         for (DefaultWeightedEdge e : E)
         {
             //System.out.println(e.toString());
-            Dict source = searchPoint(G.getEdgeSource(e));
+            //Dict source = searchPoint(G.getEdgeSource(e));
+
             Dict target = searchPoint(G.getEdgeTarget(e));
+            double  weight = G.getEdgeWeight(e);
             if (f)  // print Country details
-                System.out.printf("%s - %s \n", source.getMessage(), target.getMessage());
+                System.out.printf("\n%s (+%.0f)", target.getMessage(),weight);
             else    // print only Country name
-            {System.out.printf("%s - %s  ", source.getName(), target.getName());}
+            {System.out.printf("\n%s - %s", target.getName());}
+            G.removeVertex(G.getEdgeTarget(e));
         }
         //add = false;
     }
@@ -223,20 +219,6 @@ class Project{
         printDefaultWeightedEdges(allEdges, true);
     }
 
-    /*public void testMST()
-    {
-        conn = new ConnectivityInspector<String, DefaultEdge>(SG);
-        if (conn.isGraphConnected())
-        {
-            System.out.println("\nGraph is connected");
-            MST = new KruskalMinimumSpanningTree<String, DefaultEdge>(SG);
-            Set<DefaultEdge> treeEdges = MST.getEdgeSet();
-            System.out.printf("MST edge length = %.0f \n", MST.getSpanningTreeCost());
-            printDefaultEdges(treeEdges, true);
-        }
-        else
-            System.out.println("\nGraph is not connected");
-    }*/
 
 }   // END CLASS PROJECT
 
