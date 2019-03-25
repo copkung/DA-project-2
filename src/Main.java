@@ -15,12 +15,12 @@ class Dict
 {
     private String word;
     private int spot;
-    public Dict(String n, int bm)	{ word = n; spot = bm;}
+    public Dict(String n)	{ word = n;}
     public String getName()			    { return word; }
     public int getSpot(){return spot;}
     public String getMessage()
     {
-        String s = String.format("%s ", word);
+        String s = String.format("%s", word);
         return s;
     }
     public void print()
@@ -43,58 +43,84 @@ class Dict
 
 class Project{
     protected HashMap<String, Dict>  AllWord;// real objects
-    protected ArrayList<String> Word,SearchResult;		 // graph nodes
-    protected ArrayDeque<String> closedPath,TransTemp /*= new ArrayDeque<>()*/;
+    protected ArrayList<String> Word,SearchResult,Keep;		 // graph nodes
+    protected ArrayDeque<String> TransTemp;
 
-    protected Graph<String, DefaultWeightedEdge>                 G;
+    protected Graph<String, DefaultWeightedEdge>                 G,GSearch;
     private   SimpleWeightedGraph<String, DefaultWeightedEdge>  SG;
    /* protected ConnectivityInspector<String, DefaultEdge>       conn;
     protected KruskalMinimumSpanningTree<String, DefaultEdge>  MST;*/
     private String fileName,searchWord,Word1,Word2;
     private File wordFile;
-    private boolean check = false;
-    private int counter = 0,pos,Gspot;
+    private boolean check = false,all = true;
+    private int counter = 0,pos,ncount,npos,spot;
 
     public Project(){
         System.out.printf("Enter graph file : ");
         Scanner scan = new Scanner(System.in);
         fileName = scan.next();
-        closedPath = new ArrayDeque<String>();
-        Gspot = 1;
+        SG = new SimpleWeightedGraph<String, DefaultWeightedEdge>(DefaultWeightedEdge.class);
+        GSearch = (Graph<String, DefaultWeightedEdge>)SG;
+        spot = 1;
         try{
             wordFile = new File(fileName);
             Scanner readFile = new Scanner (wordFile);
             AllWord = new HashMap<String, Dict>();
             Word = new ArrayList<String>();
-            SG = new SimpleWeightedGraph<String, DefaultWeightedEdge>(DefaultWeightedEdge.class);
-            G  = (Graph<String, DefaultWeightedEdge>)SG;
+            Keep = new ArrayList<String>();
+            String w1 = readFile.nextLine(),w2 = "";
             while(readFile.hasNextLine())
             {
-                String w1 = readFile.nextLine();
+                w2 = readFile.nextLine();
                 if (!AllWord.containsKey(w1))
                 {
-                    AllWord.put(w1,new Dict(w1,Gspot));
+                    AllWord.put(w1,new Dict(w1));
                 }
                 if(!Word.contains(w1))
                 {
                     Word.add(w1);
                 }
+                Keep.add(w1);
+                Graphs.addEdgeWithVertices(GSearch,w1,w2,spot);
+                spot++;
+                w1 = w2;
             }
         }catch(Exception e){ System.out.printf("ERROR! : " + e ); System.exit(0);}
-        Graphs.addAllVertices(G,Word);
-        ArrayList<String> list = new ArrayList<String>(Word);
-        Collections.sort(list);     // Sort all words in order
-        ArrayDeque<String> temp = new ArrayDeque<>(list);   // put the ordered words into the arraydeque
-        for (int i = 1 ; i - 1 < temp.size();i++)
+        System.out.printf("HELLO,WORLD!!");
+//        report(Keep);
+        SG = new SimpleWeightedGraph<String, DefaultWeightedEdge>(DefaultWeightedEdge.class);
+        G  = (Graph<String, DefaultWeightedEdge>)SG;
+        while(all)
         {
-            String w1 = temp.pop();
-            String w2 = temp.peek();
-             G.addEdge(w1,w2);      // add and connect together to the graph
+            for (int e = 0 ; e < Keep.size(); e++)  // change w1 to all word in file
+            {
+                String w1 = Keep.get(e),w2 = " ";
+                for(int f = 0; f < Keep.size(); f++)  // change w2 for checking char with w1
+                {
+                    w2 = Keep.get(f);
+                    ncount = 0;
+                    for( int  k = 0 ; k < 5 ; k++)// check every char if it's the same  if it's not the same put counter to count
+                    // if counter == 1 , then these 2 word is different by 1 char and can put into new graph
+                    {
+                        if(w1.charAt(k) != w2.charAt(k)){ncount++; npos = k;} // if char w1 != char w2 counter++
+                    }
+                    if (ncount == 1) {
+                            int asc1 = checkAlOrder(w1.charAt(npos)),asc2 = checkAlOrder(w2.charAt(npos));
+                            int weight = Math.abs(asc1-asc2);
+                            Graphs.addEdgeWithVertices(G,w1,w2,weight);
+                            Keep.remove(e);
+                            break;
+                        }
+                    else continue;
+                }
+                //System.out.println("change w1");
+            }
+            System.out.println("End while");
+            all = false;
         }
-        //printGraph(); print the graph out
-        System.out.printf("Do you want to search for the word or transform the word?\n =>");
+//        printGraph();
+        System.out.printf("\nDo you want to search for the word or transform the word?\n =>");
         String choice = scan.next();
-        //System.out.printf(choice);
         switch(choice)
         {
             case "search" :
@@ -108,16 +134,14 @@ class Project{
 
     public void Search(String n)
     {
-        Set<DefaultWeightedEdge> allEdges = G.edgeSet();
+        Set<DefaultWeightedEdge> allEdges = GSearch.edgeSet();
         searchWord = n;
         ArrayList<Character> arrayInput = new ArrayList<Character>();
-        TransTemp = new ArrayDeque<String>();
         SearchResult = new ArrayList<String>();
         for(int i = 0; i < searchWord.length(); i++)
             {
                 arrayInput.add(searchWord.charAt(i));
             }
-
         for (DefaultWeightedEdge e : allEdges)
         {
             String word = searchPoint(G.getEdgeSource(e)).getMessage();
@@ -129,9 +153,10 @@ class Project{
                 }
                 else {check = false;break;}
             }
-            if(check){TransTemp.add(word);SearchResult.add(word);}
+            if(check){SearchResult.add(word);}
             else continue;
         }
+        Collections.sort(SearchResult);
     }
 
     public void report(ArrayList<String> a){
@@ -146,48 +171,13 @@ class Project{
         Word1 = scan.next();
         System.out.println("Enter 5 - letters word 2 : ");
         Word2 = scan.next();
-        int check = cmpStr(Word1,Word2),i,asc1,asc2,diff = 0;
-        String next = "",Cur = Word1;
-        boolean same = true;
-        String subCur;
-        char cur,nchar;
-        while(check <= 0) {
-            for (i = 3; i >= 0; i--)
-            {
-                subCur = Cur.substring(0, i);
-                Search(subCur);
-                if (TransTemp.size() > 2) break;
-            }
-            //need to fix this for j loop -> changing algorithm
-            for (int j = 0; j < TransTemp.size(); j++)
-            {
-                if(TransTemp.contains(Word1)) TransTemp.remove(Word1);
-                if(TransTemp.contains(Word2)){next = Word2;}
-                else {next = TransTemp.pop();}
-                check(Cur,next);
-//                if(counter == 1) break;
-                cur = Cur.charAt(pos);nchar = next.charAt(pos);
-                asc1 = checkAlOrder(cur);asc2 = checkAlOrder(nchar);
-                diff = Math.abs(asc1-asc2);
-                if(counter == 1 && diff < 10) break;
-            }
-//            cur = Cur.charAt(pos);nchar = next.charAt(pos);
 
-            System.out.printf("This is cur :" + Cur);
-            System.out.printf("\n This is next : " + next);
-            Cur = next;
-//            int asc1 = checkAlOrder(cur),asc2 = checkAlOrder(nchar),diff;
-//            diff = Math.abs(asc1-asc2);
-            System.out.printf("\n" + next + "(+%d)",diff);
-            check = cmpStr(Cur,Word2);
-            //check = 0;
-        }// end while
     }
 
     public int checkAlOrder(char i)
     {
-        int ascii = (int) i - 96;
-        return ascii;
+        int asc = (int) i - 96;
+        return asc;
     }
 
     public int cmpStr(String a, String b)
@@ -215,8 +205,7 @@ class Project{
             Dict source = searchPoint(G.getEdgeSource(e));
             Dict target = searchPoint(G.getEdgeTarget(e));
             if (f)  // print Country details
-                System.out.printf("%6s - %6s\n",
-                        source.getMessage(), target.getMessage());
+                System.out.printf("%s - %s \n", source.getMessage(), target.getMessage());
             else    // print only Country name
             {System.out.printf("%s - %s  ", source.getName(), target.getName());}
         }
@@ -228,11 +217,11 @@ class Project{
         return AllWord.get(name);
     }
 
-   /* public void printGraph()
+    public void printGraph()
     {
-        Set<DefaultEdge> allEdges = G.edgeSet();
-        printDefaultEdges(allEdges, true);
-    }*/
+        Set<DefaultWeightedEdge> allEdges = G.edgeSet();
+        printDefaultWeightedEdges(allEdges, true);
+    }
 
     /*public void testMST()
     {
