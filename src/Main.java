@@ -14,8 +14,10 @@ import java.math.*;
 class Dict
 {
     private String word;
-    public Dict(String n)	{ word = n; }
+    private int spot;
+    public Dict(String n, int bm)	{ word = n; spot = bm;}
     public String getName()			    { return word; }
+    public int getSpot(){return spot;}
     public String getMessage()
     {
         String s = String.format("%s ", word);
@@ -44,33 +46,34 @@ class Project{
     protected ArrayList<String> Word,SearchResult;		 // graph nodes
     protected ArrayDeque<String> closedPath,TransTemp /*= new ArrayDeque<>()*/;
 
-    protected Graph<String, DefaultEdge>                       G;
-    private   SimpleGraph<String, DefaultEdge>                 SG;
+    protected Graph<String, DefaultWeightedEdge>                 G;
+    private   SimpleWeightedGraph<String, DefaultWeightedEdge>  SG;
    /* protected ConnectivityInspector<String, DefaultEdge>       conn;
     protected KruskalMinimumSpanningTree<String, DefaultEdge>  MST;*/
     private String fileName,searchWord,Word1,Word2;
     private File wordFile;
     private boolean check = false;
-    private int counter = 0,pos;
+    private int counter = 0,pos,Gspot;
 
     public Project(){
         System.out.printf("Enter graph file : ");
         Scanner scan = new Scanner(System.in);
         fileName = scan.next();
         closedPath = new ArrayDeque<String>();
+        Gspot = 1;
         try{
             wordFile = new File(fileName);
             Scanner readFile = new Scanner (wordFile);
             AllWord = new HashMap<String, Dict>();
             Word = new ArrayList<String>();
-            SG = new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
-            G  = (Graph<String, DefaultEdge>)SG;
+            SG = new SimpleWeightedGraph<String, DefaultWeightedEdge>(DefaultWeightedEdge.class);
+            G  = (Graph<String, DefaultWeightedEdge>)SG;
             while(readFile.hasNextLine())
             {
                 String w1 = readFile.nextLine();
                 if (!AllWord.containsKey(w1))
                 {
-                    AllWord.put(w1,new Dict(w1));
+                    AllWord.put(w1,new Dict(w1,Gspot));
                 }
                 if(!Word.contains(w1))
                 {
@@ -105,7 +108,7 @@ class Project{
 
     public void Search(String n)
     {
-        Set<DefaultEdge> allEdges = G.edgeSet();
+        Set<DefaultWeightedEdge> allEdges = G.edgeSet();
         searchWord = n;
         ArrayList<Character> arrayInput = new ArrayList<Character>();
         TransTemp = new ArrayDeque<String>();
@@ -115,7 +118,7 @@ class Project{
                 arrayInput.add(searchWord.charAt(i));
             }
 
-        for (DefaultEdge e : allEdges)
+        for (DefaultWeightedEdge e : allEdges)
         {
             String word = searchPoint(G.getEdgeSource(e)).getMessage();
             for(int i = 0; i <searchWord.length(); i++)
@@ -136,42 +139,48 @@ class Project{
         {System.out.println(a.get(i));}
     }
 
-    public void Transform()
+    public void Transform() // this part need works
     {
         System.out.print("Enter 5 - letters word 1 : ");
         Scanner scan = new Scanner(System.in);
         Word1 = scan.next();
         System.out.println("Enter 5 - letters word 2 : ");
         Word2 = scan.next();
-        int check = cmpStr(Word1,Word2),i;
+        int check = cmpStr(Word1,Word2),i,asc1,asc2,diff = 0;
         String next = "",Cur = Word1;
         boolean same = true;
         String subCur;
         char cur,nchar;
-        while(check != 0) {
+        while(check <= 0) {
             for (i = 3; i >= 0; i--)
             {
                 subCur = Cur.substring(0, i);
                 Search(subCur);
-                if (!TransTemp.isEmpty()) break;
+                if (TransTemp.size() > 2) break;
             }
             //need to fix this for j loop -> changing algorithm
             for (int j = 0; j < TransTemp.size(); j++)
             {
-                next = TransTemp.pop();
+                if(TransTemp.contains(Word1)) TransTemp.remove(Word1);
+                if(TransTemp.contains(Word2)){next = Word2;}
+                else {next = TransTemp.pop();}
                 check(Cur,next);
-                if(counter == 1) break;
+//                if(counter == 1) break;
+                cur = Cur.charAt(pos);nchar = next.charAt(pos);
+                asc1 = checkAlOrder(cur);asc2 = checkAlOrder(nchar);
+                diff = Math.abs(asc1-asc2);
+                if(counter == 1 && diff < 10) break;
             }
-            cur = Cur.charAt(pos);nchar = next.charAt(pos);
+//            cur = Cur.charAt(pos);nchar = next.charAt(pos);
 
             System.out.printf("This is cur :" + Cur);
             System.out.printf("\n This is next : " + next);
             Cur = next;
-            int asc1 = (int)cur,asc2 = (int) nchar,diff;
-            diff = Math.abs(asc1-asc2);
+//            int asc1 = checkAlOrder(cur),asc2 = checkAlOrder(nchar),diff;
+//            diff = Math.abs(asc1-asc2);
             System.out.printf("\n" + next + "(+%d)",diff);
             check = cmpStr(Cur,Word2);
-            check = 0;
+            //check = 0;
         }// end while
     }
 
@@ -183,7 +192,7 @@ class Project{
 
     public int cmpStr(String a, String b)
     {
-        return a.compareTo(b);
+        return a.compareToIgnoreCase(b);
     }
     // It returns 0 when the strings are equal otherwise it returns positive or negative value.
 
@@ -198,9 +207,9 @@ class Project{
         }
     }
 
-    public void printDefaultEdges(Collection<DefaultEdge> E, boolean f)
+    public void printDefaultWeightedEdges(Collection<DefaultWeightedEdge> E, boolean f)
     {
-        for (DefaultEdge e : E)
+        for (DefaultWeightedEdge e : E)
         {
             //System.out.println(e.toString());
             Dict source = searchPoint(G.getEdgeSource(e));
