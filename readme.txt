@@ -1,5 +1,3 @@
-# DA-project-2
-
 Mr. Wanatbodee Buriwong		(5980026)
 Mr. Thanadol Apikasemsunt	(5981047)
 Ms. Nichakorn Harnpanichkij	(6080199)
