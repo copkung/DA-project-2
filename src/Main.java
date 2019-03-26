@@ -45,7 +45,7 @@ class Project{
     protected HashMap<String, Dict>  AllWord;// real objects
     protected ArrayList<String> Word,SearchResult,Keep;		 // graph nodes
 
-    protected Graph<String, DefaultWeightedEdge>                 G,GSearch;
+    protected Graph<String, DefaultWeightedEdge>                 G;
     private   SimpleWeightedGraph<String, DefaultWeightedEdge>  SG;
     protected DijkstraShortestPath<String, DefaultWeightedEdge>         DSP;
     private String fileName,searchWord,Word1,Word2,Prev;
@@ -57,9 +57,6 @@ class Project{
         System.out.printf("Enter graph file : ");
         Scanner scan = new Scanner(System.in);
         fileName = scan.next();
-        SG = new SimpleWeightedGraph<String, DefaultWeightedEdge>(DefaultWeightedEdge.class);
-        GSearch = (Graph<String, DefaultWeightedEdge>)SG;
-        spot = 1;
         try{
             wordFile = new File(fileName);
             Scanner readFile = new Scanner (wordFile);
@@ -79,8 +76,6 @@ class Project{
                     Word.add(w1);
                 }
                 Keep.add(w1);
-                Graphs.addEdgeWithVertices(GSearch,w1,w2,spot);
-                spot++;
                 w1 = w2;
             }
         }catch(Exception e){ System.out.printf("ERROR! : " + e ); System.exit(0);}
@@ -108,9 +103,7 @@ class Project{
                             Graphs.addEdgeWithVertices(G,w1,w2,weight);
                         }
                 }
-                //System.out.println("change w1");
             }
-            System.out.print("\nEnd while");
             all = false;
         }
 //        printGraph();
@@ -129,7 +122,6 @@ class Project{
 
     public void Search(String n)
     {
-        Set<DefaultWeightedEdge> allEdges = GSearch.edgeSet();
         searchWord = n;
         ArrayList<Character> arrayInput = new ArrayList<Character>();
         SearchResult = new ArrayList<String>();
@@ -137,12 +129,12 @@ class Project{
             {
                 arrayInput.add(searchWord.charAt(i));
             }
-        for (DefaultWeightedEdge e : allEdges)
+        for (int j = 0; j < Keep.size(); j++)
         {
-            String word = searchPoint(G.getEdgeSource(e)).getMessage();
+            String word = Keep.get(j);
             for(int i = 0; i <searchWord.length(); i++)
             {
-                if(searchWord.charAt(i) == word.charAt(i))
+                if(word.contains(searchWord))
                 {
                     check = true;
                 }
@@ -159,7 +151,7 @@ class Project{
         {System.out.println(a.get(i));}
     }
 
-    public void Transform() // this part need works
+    public void Transform()
     {
         System.out.print("Enter 5 - letters word 1 : ");
         Scanner scan = new Scanner(System.in);
@@ -168,7 +160,6 @@ class Project{
         System.out.print("Enter 5 - letters word 2 : ");
         String k2 = scan.next();
         Word2 = k2;
-       // Prev = Word1;
         if (G.containsVertex(k1) && G.containsVertex(k2))
         {
             DSP = new DijkstraShortestPath<String, DefaultWeightedEdge>(SG, k1, k2);
@@ -196,7 +187,6 @@ class Project{
         double total = 0;
         for (DefaultWeightedEdge e : E)
         {
-            //System.out.println(e.toString());
             Dict source = searchPoint(G.getEdgeSource(e));
             Dict target = searchPoint(G.getEdgeTarget(e));
             String sourceWord = source.getMessage();
@@ -214,7 +204,6 @@ class Project{
             Prev = printWord;
         }
         System.out.printf("\nTotal cost = %.0f",total);
-        //add = false;
     }
 
     public Dict searchPoint(String name)
