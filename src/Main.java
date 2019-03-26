@@ -70,6 +70,7 @@ class Project{
                     Keep.add(w1);
                     w1 = w2;
                 }
+                Keep.add(w1);
             } catch (Exception e) {
                 System.out.printf("ERROR! : " + e);
                 System.out.printf("\nEnter new file :");
@@ -114,10 +115,7 @@ class Project{
                     Search(inSearch);
                     report(SearchResult);
                     pass = true;
-                } else if (t == 0) {
-                    Transform();
-                    pass = true;
-                }
+                } else if (t == 0) { Transform();pass = true; }
                 else {System.out.printf("ERROR! Choice not found. Enter input again : ");choice = scan.next(); pass = false;}
             }while(!pass);
             System.out.printf("\nContinue (y/n)? >> ");
@@ -207,9 +205,9 @@ class Project{
             else if (Prev.equals(targetWord)){printWord = sourceWord;}
             double  weight = G.getEdgeWeight(e);
             total = total + weight;
-            if (f)  // print Country details
+            if (f)
                 System.out.printf("\n%s (+%.0f)", printWord,weight);
-            else    // print only Country name
+            else
             {System.out.printf("\n%s - %s", target.getName());}
             Prev = printWord;
         }
