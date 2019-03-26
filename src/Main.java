@@ -1,15 +1,12 @@
 
 import java.util.*;
-
 import org.jgrapht.*;
 import org.jgrapht.graph.*;
 import org.jgrapht.alg.*;
 import sun.tools.tree.CharExpression;
-
 import java.io.*;
 import java.lang.*;
 import java.math.*;
-
 
 class Dict
 {
@@ -27,37 +24,37 @@ class Dict
     {
         System.out.println( getMessage() );
     }
-    // equality based on name
     public boolean equals(Object o)
     {
         Dict other = (Dict) o;
         return this.word.equalsIgnoreCase(other.word);
     }
-    // hashcode based on the hashcode of name
     public int hashCode()
     {
         return word.toLowerCase().hashCode();
     }
-}   //END CLASS DICT
+}
 
 
 class Project{
-    protected HashMap<String, Dict>  AllWord;// real objects
-    protected ArrayList<String> Word,SearchResult,Keep;		 // graph nodes
+    protected HashMap<String, Dict>  AllWord;
+    protected ArrayList<String> Word,SearchResult,Keep;
 
     protected Graph<String, DefaultWeightedEdge>                 G;
     private   SimpleWeightedGraph<String, DefaultWeightedEdge>  SG;
     protected DijkstraShortestPath<String, DefaultWeightedEdge>         DSP;
+
     private String fileName,searchWord,Word1,Word2,Prev;
     private File wordFile;
     private boolean check = false,all = true;
-    private int counter = 0,pos,ncount,npos,spot;
+    private int ncount,npos;
 
     public Project(){
         System.out.printf("Enter graph file : ");
         Scanner scan = new Scanner(System.in);
-        fileName = scan.next();
+        do{
         try{
+            fileName = scan.next();
             wordFile = new File(fileName);
             Scanner readFile = new Scanner (wordFile);
             AllWord = new HashMap<String, Dict>();
@@ -78,24 +75,22 @@ class Project{
                 Keep.add(w1);
                 w1 = w2;
             }
-        }catch(Exception e){ System.out.printf("ERROR! : " + e ); System.exit(0);}
-        System.out.printf("HELLO,WORLD!!");
-//        report(Keep);
+        }catch(Exception e){ System.out.printf("ERROR! : " + e );System.out.printf("\nEnter new file :");}
+        }while(!wordFile.isFile());
         SG = new SimpleWeightedGraph<String, DefaultWeightedEdge>(DefaultWeightedEdge.class);
         G  = (Graph<String, DefaultWeightedEdge>)SG;
         while(all)
         {
-            for (int e = 0 ; e < Keep.size(); e++)  // change w1 to all word in file
+            for (int e = 0 ; e < Keep.size(); e++)
             {
                 String w1 = Keep.get(e),w2 = " ";
-                for(int f = 0; f < Keep.size(); f++)  // change w2 for checking char with w1
+                for(int f = 0; f < Keep.size(); f++)
                 {
                     w2 = Keep.get(f);
                     ncount = 0;
-                    for( int  k = 0 ; k < 5 ; k++)// check every char if it's the same  if it's not the same put counter to count
-                    // if counter == 1 , then these 2 word is different by 1 char and can put into new graph
+                    for( int  k = 0 ; k < 5 ; k++)
                     {
-                        if(w1.charAt(k) != w2.charAt(k)){ncount++; npos = k;} // if char w1 != char w2 counter++
+                        if(w1.charAt(k) != w2.charAt(k)){ncount++; npos = k;}
                     }
                     if (ncount == 1) {
                             int asc1 = checkAlOrder(w1.charAt(npos)),asc2 = checkAlOrder(w2.charAt(npos));
@@ -106,7 +101,6 @@ class Project{
             }
             all = false;
         }
-//        printGraph();
         System.out.printf("\nDo you want to search for the word or transform the word?\n =>");
         String choice = scan.next();
         switch(choice)
@@ -210,13 +204,6 @@ class Project{
     {
         return AllWord.get(name);
     }
-
-    public void printGraph()
-    {
-        Set<DefaultWeightedEdge> allEdges = G.edgeSet();
-        printDefaultWeightedEdges(allEdges, true);
-    }
-
 
 }   // END CLASS PROJECT
 
