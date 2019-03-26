@@ -11,10 +11,8 @@ import java.math.*;
 class Dict
 {
     private String word;
-    private int spot;
     public Dict(String n)	{ word = n;}
     public String getName()			    { return word; }
-    public int getSpot(){return spot;}
     public String getMessage()
     {
         String s = String.format("%s", word);
@@ -51,65 +49,80 @@ class Project{
     public Project(){
         System.out.printf("Enter graph file : ");
         Scanner scan = new Scanner(System.in);
-        do{
-        try{
-            fileName = scan.next();
-            wordFile = new File(fileName);
-            Scanner readFile = new Scanner (wordFile);
-            AllWord = new HashMap<String, Dict>();
-            Word = new ArrayList<String>();
-            Keep = new ArrayList<String>();
-            String w1 = readFile.nextLine(),w2 = "";
-            while(readFile.hasNextLine())
-            {
-                w2 = readFile.nextLine();
-                if (!AllWord.containsKey(w1))
-                {
-                    AllWord.put(w1,new Dict(w1));
+        String con;
+        do {
+            try {
+                fileName = scan.next();
+                wordFile = new File(fileName);
+                Scanner readFile = new Scanner(wordFile);
+                AllWord = new HashMap<String, Dict>();
+                Word = new ArrayList<String>();
+                Keep = new ArrayList<String>();
+                String w1 = readFile.nextLine(), w2 = "";
+                while (readFile.hasNextLine()) {
+                    w2 = readFile.nextLine();
+                    if (!AllWord.containsKey(w1)) {
+                        AllWord.put(w1, new Dict(w1));
+                    }
+                    if (!Word.contains(w1)) {
+                        Word.add(w1);
+                    }
+                    Keep.add(w1);
+                    w1 = w2;
                 }
-                if(!Word.contains(w1))
-                {
-                    Word.add(w1);
-                }
-                Keep.add(w1);
-                w1 = w2;
+            } catch (Exception e) {
+                System.out.printf("ERROR! : " + e);
+                System.out.printf("\nEnter new file :");
             }
-        }catch(Exception e){ System.out.printf("ERROR! : " + e );System.out.printf("\nEnter new file :");}
-        }while(!wordFile.isFile());
+        } while (!wordFile.isFile());
         SG = new SimpleWeightedGraph<String, DefaultWeightedEdge>(DefaultWeightedEdge.class);
-        G  = (Graph<String, DefaultWeightedEdge>)SG;
-        while(all)
-        {
-            for (int e = 0 ; e < Keep.size(); e++)
-            {
-                String w1 = Keep.get(e),w2 = " ";
-                for(int f = 0; f < Keep.size(); f++)
-                {
+        G = (Graph<String, DefaultWeightedEdge>) SG;
+        while (all) {
+            for (int e = 0; e < Keep.size(); e++) {
+                String w1 = Keep.get(e), w2 = " ";
+                for (int f = 0; f < Keep.size(); f++) {
                     w2 = Keep.get(f);
                     ncount = 0;
-                    for( int  k = 0 ; k < 5 ; k++)
-                    {
-                        if(w1.charAt(k) != w2.charAt(k)){ncount++; npos = k;}
+                    for (int k = 0; k < 5; k++) {
+                        if (w1.charAt(k) != w2.charAt(k)) {
+                            ncount++;
+                            npos = k;
+                        }
                     }
                     if (ncount == 1) {
-                            int asc1 = checkAlOrder(w1.charAt(npos)),asc2 = checkAlOrder(w2.charAt(npos));
-                            int weight = Math.abs(asc1-asc2);
-                            Graphs.addEdgeWithVertices(G,w1,w2,weight);
-                        }
+                        int asc1 = checkAlOrder(w1.charAt(npos)), asc2 = checkAlOrder(w2.charAt(npos));
+                        int weight = Math.abs(asc1 - asc2);
+                        Graphs.addEdgeWithVertices(G, w1, w2, weight);
+                    }
                 }
             }
             all = false;
         }
-        System.out.printf("\nDo you want to search for the word or transform the word?\n =>");
-        String choice = scan.next();
-        switch(choice)
-        {
-            case "search" :
-                System.out.print("\nSearch => ");
-                String inSearch = scan.next();Search(inSearch);report(SearchResult);
-                break;
-            case "transform":Transform();break;
-        }
+        do {
+            System.out.printf("\nDo you want to search for the word or transform the word?\n =>");
+            String choice = scan.next();
+            int s = 0, t = 0;
+            s = cmpString(choice, "search");
+            t = cmpString(choice, "transform");
+            boolean pass = false;
+            do {
+                s = cmpString(choice, "search");
+                t = cmpString(choice, "transform");
+                if (s == 0) {
+                    System.out.print("\nSearch => ");
+                    String inSearch = scan.next();
+                    Search(inSearch);
+                    report(SearchResult);
+                    pass = true;
+                } else if (t == 0) {
+                    Transform();
+                    pass = true;
+                }
+                else {System.out.printf("ERROR! Choice not found. Enter input again : ");choice = scan.next(); pass = false;}
+            }while(!pass);
+            System.out.printf("\nContinue (y/n)? >> ");
+            con = scan.next();
+        }while(cmpString(con,"y") == 0);
         System.out.println("\n--------END PROGRAM-------");
     }
 
@@ -164,7 +177,10 @@ class Project{
             else
                 System.out.printf("\nCannot transform %s into %s\n", k1, k2);
         }
-        else {System.out.printf("\nCannot transform %s into %s\n", k1, k2);}
+        else {
+            if(!G.containsVertex(k1))System.out.printf("%s is not in the file",k1);
+            if(!G.containsVertex(k2)) System.out.printf("%s is not in the file",k2);
+        }
     }
 
     public int checkAlOrder(char i)
@@ -172,6 +188,8 @@ class Project{
         int asc = (int) i - 96;
         return asc;
     }
+
+    public int cmpString(String a , String b) {return a.compareToIgnoreCase(b);}
 
     public void printDefaultWeightedEdges(Collection<DefaultWeightedEdge> E, boolean f)
     {
@@ -193,7 +211,6 @@ class Project{
                 System.out.printf("\n%s (+%.0f)", printWord,weight);
             else    // print only Country name
             {System.out.printf("\n%s - %s", target.getName());}
-            G.removeVertex(G.getEdgeTarget(e));
             Prev = printWord;
         }
         System.out.printf("\nTotal cost = %.0f",total);
