@@ -165,11 +165,10 @@ class Project{
         Scanner scan = new Scanner(System.in);
         String k1 = scan.next();
         Word1 = k1;
-        System.out.println("Enter 5 - letters word 2 : ");
+        System.out.print("Enter 5 - letters word 2 : ");
         String k2 = scan.next();
         Word2 = k2;
-        Prev = Word1;
-        System.out.printf("\n%s",Word1);
+       // Prev = Word1;
         if (G.containsVertex(k1) && G.containsVertex(k2))
         {
             DSP = new DijkstraShortestPath<String, DefaultWeightedEdge>(SG, k1, k2);
@@ -181,6 +180,7 @@ class Project{
             else
                 System.out.printf("\nCannot transform %s into %s\n", k1, k2);
         }
+        else {System.out.printf("\nCannot transform %s into %s\n", k1, k2);}
     }
 
     public int checkAlOrder(char i)
@@ -191,10 +191,12 @@ class Project{
 
     public void printDefaultWeightedEdges(Collection<DefaultWeightedEdge> E, boolean f)
     {
+        Prev = Word1;
+        System.out.printf("\n%s",Word1);
+        double total = 0;
         for (DefaultWeightedEdge e : E)
         {
             //System.out.println(e.toString());
-
             Dict source = searchPoint(G.getEdgeSource(e));
             Dict target = searchPoint(G.getEdgeTarget(e));
             String sourceWord = source.getMessage();
@@ -203,14 +205,15 @@ class Project{
             if(Prev.equals(sourceWord)){printWord = targetWord;}
             else if (Prev.equals(targetWord)){printWord = sourceWord;}
             double  weight = G.getEdgeWeight(e);
-
+            total = total + weight;
             if (f)  // print Country details
                 System.out.printf("\n%s (+%.0f)", printWord,weight);
             else    // print only Country name
             {System.out.printf("\n%s - %s", target.getName());}
             G.removeVertex(G.getEdgeTarget(e));
-            Prev = target.getMessage();
+            Prev = printWord;
         }
+        System.out.printf("\nTotal cost = %.0f",total);
         //add = false;
     }
 
