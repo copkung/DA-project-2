@@ -35,7 +35,6 @@ class Dict
     }
 }
 
-
 class Project{
     protected HashMap<String, Dict>  AllWord;
     protected ArrayList<String> Word,SearchResult,Keep;
