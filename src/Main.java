@@ -216,8 +216,6 @@ class Project{
         Set<DefaultWeightedEdge> allEdges = G.edgeSet();
         printDefaultWeightedEdges(allEdges, true);
     }
-
-
 }   // END CLASS PROJECT
 
 
