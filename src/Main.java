@@ -43,7 +43,7 @@ class Project{
 
     private String fileName,searchWord,Word1,Word2,Prev;
     private File wordFile;
-    private boolean check = false,all = true;
+    private boolean check = false;
     private int ncount,npos;
 
     public Project(){
@@ -78,7 +78,6 @@ class Project{
         } while (!wordFile.isFile());
         SG = new SimpleWeightedGraph<String, DefaultWeightedEdge>(DefaultWeightedEdge.class);
         G = (Graph<String, DefaultWeightedEdge>) SG;
-        while (all) {
             for (int e = 0; e < Keep.size(); e++) {
                 String w1 = Keep.get(e), w2 = " ";
                 for (int f = 0; f < Keep.size(); f++) {
@@ -97,8 +96,6 @@ class Project{
                     }
                 }
             }
-            all = false;
-        }
         do {
             System.out.printf("\nDo you want to search for the word or transform the word?\n =>");
             String choice = scan.next();
