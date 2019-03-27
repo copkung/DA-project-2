@@ -120,6 +120,16 @@ class Project{
             }while(!pass);
             System.out.printf("\nContinue (y/n)? >> ");
             con = scan.next();
+            pass = false;
+            do{
+                int y=0,n=0;
+                y = cmpString(con, "y");
+                n = cmpString(con, "n");
+                if (y == 0) {
+                    pass = true;
+                } else if (n == 0) {pass = true; }
+                else {System.out.printf("ERROR! Choice is wrong. Enter input again : ");con = scan.next(); pass = false;}
+            }while(!pass);
         }while(cmpString(con,"y") == 0);
         System.out.println("\n--------END PROGRAM-------");
     }
