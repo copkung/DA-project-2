@@ -186,8 +186,9 @@ class Project{
                 System.out.printf("\nCannot transform %s into %s\n", k1, k2);
         }
         else {
-            if(!G.containsVertex(k1))System.out.printf("%s is not in the file",k1);
-            if(!G.containsVertex(k2)) System.out.printf("%s is not in the file",k2);
+            System.out.printf("\nCannot transform word\n");
+            if(!Keep.contains(k1))System.out.printf("%s is not in the file",k1);
+            if(!Keep.contains(k2)) System.out.printf("%s is not in the file",k2);
         }
     }
 
